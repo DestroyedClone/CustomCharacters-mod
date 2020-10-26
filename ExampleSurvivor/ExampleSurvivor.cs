@@ -1140,6 +1140,10 @@ namespace EntityStates.ExampleSurvivorStates
         public float damageCoefficient = 1f;
         public float baseDuration = 0.5f;
         public float recoil = 1f;
+        public float spreadCoefficient = 2f;
+        public uint bulletCountValue = 8U;
+        public float forceValue = 3f;
+        public float distanceValue = 150;
         //public static GameObject tracerEffectPrefab = Resources.Load<GameObject>("Prefabs/Effects/Tracers/TracerToolbotRebar");
         public GameObject effectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/Hitspark");
         public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
@@ -1157,7 +1161,10 @@ namespace EntityStates.ExampleSurvivorStates
             this.duration = this.baseDuration / this.attackSpeedStat;
             this.fireDuration = 0.25f * this.duration;
             base.characterBody.SetAimTimer(2f);
-            //this.animator = base.GetModelAnimator();
+            spreadCoefficient = 2f;
+            bulletCountValue = 8U;
+            forceValue = 3f;
+            distanceValue = 150;
             this.muzzleString = "Muzzle";
 
 
@@ -1189,11 +1196,11 @@ namespace EntityStates.ExampleSurvivorStates
                         origin = aimRay.origin,
                         aimVector = aimRay.direction,
                         minSpread = 0f,
-                        maxSpread = base.characterBody.spreadBloomAngle * 2f,
-                        bulletCount = 6U,
+                        maxSpread = base.characterBody.spreadBloomAngle * spreadCoefficient,
+                        bulletCount = bulletCountValue,
                         procCoefficient = 0.75f,
                         damage = base.characterBody.damage * damageCoefficient,
-                        force = 3,
+                        force = forceValue,
                         falloffModel = BulletAttack.FalloffModel.DefaultBullet,
                         tracerEffectPrefab = this.tracerEffectPrefab,
                         hitEffectPrefab = this.hitEffectPrefab,
@@ -1201,7 +1208,7 @@ namespace EntityStates.ExampleSurvivorStates
                         HitEffectNormal = false,
                         stopperMask = LayerIndex.world.mask,
                         smartCollision = true,
-                        maxDistance = 150f
+                        maxDistance = distanceValue
                     }.Fire();
                 }
             }
@@ -1226,95 +1233,14 @@ namespace EntityStates.ExampleSurvivorStates
             return InterruptPriority.Skill;
         }
     }
-    public class Scout_ForceNature : BaseSkillState
+    public class Scout_ForceNature : Scout_Scattergun
     {
-        public float damageCoefficient = 0.8f;
-        public float baseDuration = 0.5f;
-        public float recoil = 1f;
-        //public static GameObject tracerEffectPrefab = Resources.Load<GameObject>("Prefabs/Effects/Tracers/TracerToolbotRebar");
-        public GameObject effectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/Hitspark");
-        public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
-        public GameObject tracerEffectPrefab = Resources.Load<GameObject>("prefabs/effects/tracers/tracerbanditshotgun");
-
-        private float duration;
-        private float fireDuration;
-        private bool hasFired;
-        //private Animator animator;
-        private string muzzleString;
-
         public override void OnEnter()
         {
-            base.OnEnter();
-            this.duration = this.baseDuration / this.attackSpeedStat;
-            this.fireDuration = 0.25f * this.duration;
-            base.characterBody.SetAimTimer(2f);
-            //this.animator = base.GetModelAnimator();
-            this.muzzleString = "Muzzle";
-
-
-            base.PlayAnimation("Gesture, Override", "FireArrow", "FireArrow.playbackRate", this.duration);
-        }
-
-        public override void OnExit()
-        {
-            base.OnExit();
-        }
-
-        private void FireArrow()
-        {
-            if (!this.hasFired)
-            {
-                this.hasFired = true;
-
-                base.characterBody.AddSpreadBloom(0.75f);
-                Ray aimRay = base.GetAimRay();
-                EffectManager.SimpleMuzzleFlash(Commando.CommandoWeapon.FirePistol.effectPrefab, base.gameObject, this.muzzleString, false);
-
-                if (base.isAuthority)
-                {
-                    //ProjectileManager.instance.FireProjectile(ExampleSurvivor.ScoutSurvivor.arrowProjectile, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), base.gameObject, this.damageCoefficient * this.damageStat, 0f, Util.CheckRoll(this.critStat, base.characterBody.master), DamageColorIndex.Default, null, -1f);
-                    new BulletAttack
-                    {
-                        owner = base.gameObject,
-                        weapon = base.gameObject,
-                        origin = aimRay.origin,
-                        aimVector = aimRay.direction,
-                        minSpread = 0f,
-                        maxSpread = base.characterBody.spreadBloomAngle * 3f,
-                        bulletCount = 8U,
-                        procCoefficient = 0.75f,
-                        damage = base.characterBody.damage * damageCoefficient,
-                        force = 9,
-                        falloffModel = BulletAttack.FalloffModel.DefaultBullet,
-                        tracerEffectPrefab = this.tracerEffectPrefab,
-                        hitEffectPrefab = this.hitEffectPrefab,
-                        isCrit = base.RollCrit(),
-                        HitEffectNormal = false,
-                        stopperMask = LayerIndex.world.mask,
-                        smartCollision = true,
-                        maxDistance = 90f
-                    }.Fire();
-                }
-            }
-        }
-        public override void FixedUpdate()
-        {
-            base.FixedUpdate();
-
-            if (base.fixedAge >= this.fireDuration)
-            {
-                FireArrow();
-            }
-
-            if (base.fixedAge >= this.duration && base.isAuthority)
-            {
-                this.outer.SetNextStateToMain();
-            }
-        }
-
-        public override InterruptPriority GetMinimumInterruptPriority()
-        {
-            return InterruptPriority.Skill;
+            spreadCoefficient = 2f;
+            bulletCountValue = 6U;
+            forceValue = 3f;
+            distanceValue = 90;
         }
     }
     public class Scout_Pistol : BaseSkillState
@@ -1496,10 +1422,12 @@ namespace EntityStates.ExampleSurvivorStates
         private float duration;
         public float damageCoefficient = 0.3f;
         public bool skillUsed = false;
+        public DamageType DamageTypeValue;
         public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
         public override void OnEnter()
         {
             base.OnEnter();
+            DamageTypeValue = DamageType.CrippleOnHit;
             this.duration = this.baseDuration / base.attackSpeedStat;
             Ray aimRay = base.GetAimRay();
             base.StartAimMode(aimRay, 2f, false);
@@ -1515,7 +1443,7 @@ namespace EntityStates.ExampleSurvivorStates
                     losType = BlastAttack.LoSType.NearestHit,
                     falloffModel = BlastAttack.FalloffModel.None,
                     baseDamage = base.characterBody.damage * damageCoefficient,
-                    damageType = DamageType.CrippleOnHit,
+                    damageType = DamageTypeValue,
                     crit = base.RollCrit(),
                     radius = 2.5f,
                     teamIndex = base.GetTeam()
@@ -1549,69 +1477,11 @@ namespace EntityStates.ExampleSurvivorStates
             return InterruptPriority.Skill;
         }
     }
-    public class Scout_BostonBasher : BaseSkillState
+    public class Scout_BostonBasher : Scout_FanOWar
     {
-        public float baseDuration = 0.5f;
-        private float duration;
-        public float damageCoefficient = 0.8f;
-        public bool skillUsed = false;
-        public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
         public override void OnEnter()
         {
-            base.OnEnter();
-            this.duration = this.baseDuration / base.attackSpeedStat;
-            Ray aimRay = base.GetAimRay();
-            base.StartAimMode(aimRay, 2f, false);
-            if (base.isAuthority)
-            {
-                PlayAnim(0.5f);
-                new BulletAttack
-                {
-                    owner = base.gameObject,
-                    weapon = base.gameObject,
-                    origin = aimRay.origin,
-                    aimVector = aimRay.direction,
-                    minSpread = 0f,
-                    maxSpread = 0f,
-                    bulletCount = 1U,
-                    procCoefficient = 1f,
-                    damage = base.characterBody.damage * damageCoefficient,
-                    damageType = DamageType.BleedOnHit,
-                    force = 0,
-                    hitEffectPrefab = this.hitEffectPrefab,
-                    isCrit = base.RollCrit(),
-                    HitEffectNormal = false,
-                    stopperMask = LayerIndex.world.mask,
-                    smartCollision = true,
-                    maxDistance = 5f
-                }.Fire();
-                skillUsed = true;
-            }
-        }
-        private void PlayAnim(float duration) //from FireFMJ
-        {
-            PlayAnimation("Gesture, Additive", "ThrowGrenade", "FireFMJ.playbackRate", duration * 2f);
-            PlayAnimation("Gesture, Override", "ThrowGrenade", "FireFMJ.playbackRate", duration * 2f);
-        }
-        public override void OnExit()
-        {
-            base.OnExit();
-        }
-        public override void FixedUpdate()
-        {
-            base.FixedUpdate();
-            if (base.fixedAge >= this.duration && base.isAuthority)
-            {
-                this.outer.SetNextStateToMain();
-                skillUsed = false;
-                return;
-            }
-        }
-
-
-        public override InterruptPriority GetMinimumInterruptPriority()
-        {
-            return InterruptPriority.Skill;
+            DamageTypeValue = DamageType.BleedOnHit;
         }
     }
     public class EquipBonk : BaseSkillState
