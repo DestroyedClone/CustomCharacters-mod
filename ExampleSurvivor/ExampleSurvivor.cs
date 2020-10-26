@@ -1158,17 +1158,18 @@ namespace EntityStates.ExampleSurvivorStates
         public override void OnEnter()
         {
             base.OnEnter();
+            damageCoefficient = 1f;
+            baseDuration = 0.5f;
+            recoil = 1f;
+           // spreadCoefficient = 2f;
+           // bulletCountValue = 8U;
+           // forceValue = 3f;
+            //distanceValue = 150;
+            Chat.AddMessage(Convert.ToString(forceValue));
             this.duration = this.baseDuration / this.attackSpeedStat;
             this.fireDuration = 0.25f * this.duration;
             base.characterBody.SetAimTimer(2f);
-            spreadCoefficient = 2f;
-            bulletCountValue = 8U;
-            forceValue = 3f;
-            distanceValue = 150;
             this.muzzleString = "Muzzle";
-
-
-            base.PlayAnimation("Gesture, Override", "FireArrow", "FireArrow.playbackRate", this.duration);
         }
 
         public override void OnExit()
@@ -1238,9 +1239,10 @@ namespace EntityStates.ExampleSurvivorStates
         public override void OnEnter()
         {
             spreadCoefficient = 2f;
-            bulletCountValue = 6U;
-            forceValue = 3f;
+            bulletCountValue = 8U;
+            forceValue = 9f;
             distanceValue = 90;
+            base.OnEnter();
         }
     }
     public class Scout_Pistol : BaseSkillState
@@ -1422,12 +1424,11 @@ namespace EntityStates.ExampleSurvivorStates
         private float duration;
         public float damageCoefficient = 0.3f;
         public bool skillUsed = false;
-        public DamageType DamageTypeValue;
+        public DamageType DamageTypeValue = DamageType.CrippleOnHit;
         public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
         public override void OnEnter()
         {
             base.OnEnter();
-            DamageTypeValue = DamageType.CrippleOnHit;
             this.duration = this.baseDuration / base.attackSpeedStat;
             Ray aimRay = base.GetAimRay();
             base.StartAimMode(aimRay, 2f, false);
@@ -1481,7 +1482,8 @@ namespace EntityStates.ExampleSurvivorStates
     {
         public override void OnEnter()
         {
-            DamageTypeValue = DamageType.BleedOnHit;
+            DamageTypeValue = DamageType.BleedOnHit; //Doesnt work?
+            base.OnEnter();
         }
     }
     public class EquipBonk : BaseSkillState
