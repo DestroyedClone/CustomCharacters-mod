@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ExampleSurvivor;
 
-namespace ExampleSurvivor
+namespace EntityStates.ExampleSurvivorStates
 {
-    class ScoutScattergun
-    {
-    }
+
 }
